@@ -59,7 +59,7 @@ def post_chat_message(payload: ChatRequest, db: Session = Depends(get_db)):
         # Non-PIN code flow
         english_msg = to_english(message, detected_lang)
         triage = classify_urgency(english_msg)
-        answer = get_answer(english_msg)
+        answer = get_answer(english_msg, payload.session_id)
         translated_reply = from_english(answer, detected_lang)
         
         return ChatResponse(

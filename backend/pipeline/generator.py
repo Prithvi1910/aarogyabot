@@ -4,7 +4,11 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
-from langchain_classic.chains import RetrievalQA
+from langchain.chains import ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+import uuid
+
+SESSION_MEMORIES = {}
 
 # Relative import of get_retriever
 from .retriever import get_retriever
@@ -48,9 +52,9 @@ HEALTH_PROMPT = PromptTemplate.from_template(
     "Answer as an expert doctor in a highly descriptive, professional, and empathetic manner:"
 )
 
-def get_answer(query: str) -> str:
+def get_answer(query: str, session_id: str = None) -> str:
     """
-    Builds a RetrievalQA chain using get_llm() and get_retriever()
+    Builds a ConversationalRetrievalChain using get_llm() and get_retriever()
     Uses the HEALTH_PROMPT
     Returns the answer string
     Wraps everything in try/except and returns a safe fallback message on error
@@ -58,22 +62,32 @@ def get_answer(query: str) -> str:
     try:
         llm = get_llm()
         retriever = get_retriever()
-        qa_chain = RetrievalQA.from_chain_type(
+        
+        if not session_id:
+            session_id = str(uuid.uuid4())
+            
+        if session_id not in SESSION_MEMORIES:
+            SESSION_MEMORIES[session_id] = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+            
+        memory = SESSION_MEMORIES[session_id]
+        
+        qa_chain = ConversationalRetrievalChain.from_llm(
             llm=llm,
-            chain_type="stuff",
             retriever=retriever,
-            chain_type_kwargs={"prompt": HEALTH_PROMPT}
+            memory=memory,
+            combine_docs_chain_kwargs={"prompt": HEALTH_PROMPT}
         )
-        response = qa_chain.invoke({"query": query})
+        
+        response = qa_chain.invoke({"question": query})
         if isinstance(response, dict):
-            return response.get("result", "").strip()
+            return response.get("answer", "").strip()
         return str(response).strip()
     except Exception as e:
         print(f"Error in get_answer: {e}")
         return "I am sorry, I am having trouble answering right now. Please visit your nearest PHC."
 
-def generate_response(query: str, context: List[Dict[str, Any]] = None) -> str:
+def generate_response(query: str, context: List[Dict[str, Any]] = None, session_id: str = None) -> str:
     """
     Generates a response from the LLM based on user query and retrieved health contexts.
     """
-    return get_answer(query)
+    return get_answer(query, session_id)

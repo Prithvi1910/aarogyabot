@@ -25,6 +25,7 @@ function ChatInterface() {
   ])
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [sessionId] = useState(() => 'sess-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9))
   const messagesEndRef = useRef(null)
 
   // Speech Recognition State
@@ -134,7 +135,7 @@ function ChatInterface() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message: text })
+        body: JSON.stringify({ message: text, session_id: sessionId })
       })
 
       if (!response.ok) {
