@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# FAISS index (rebuild on server)
+backend/data/faiss_index/
+
+# SQLite (rebuild on server)
+backend/data/phc_database.sqlite
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db

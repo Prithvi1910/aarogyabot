@@ -1,0 +1,31 @@
+Aarogyabot Healthcare Documentation: Common Infectious and Communicable Diseases in India
+
+1. Fever and Influenza (Common Flu)
+General fever is a temporary increase in body temperature, often due to an underlying infection. In India, seasonal influenza and viral fevers are common, especially during monsoon and winter months.
+Symptoms: High body temperature, chills, sweating, headache, body aches, fatigue, sore throat, cough, and runny nose.
+Prevention: Maintain hand hygiene by washing hands with soap and water frequently. Avoid close contact with infected individuals. Get vaccinated annually with the seasonal flu vaccine. Ensure proper ventilation in indoor spaces.
+When to Seek Care: Seek immediate medical attention if the fever exceeds 103°F (39.4°C), lasts more than 3 consecutive days, or is accompanied by severe difficulty breathing, chest pain, persistent vomiting, or confusion.
+
+2. Malaria
+Malaria is a life-threatening disease caused by Plasmodium parasites transmitted to people through the bites of infected female Anopheles mosquitoes. It is highly prevalent in many tropical and subtropical regions of India.
+Symptoms: High fever with shaking chills, sweating, headache, nausea, vomiting, muscle pain, and fatigue. Symptoms usually appear 10–15 days after the infective mosquito bite.
+Prevention: Prevent mosquito bites by sleeping under insecticide-treated bed nets, using mosquito repellents, wearing long-sleeved clothing, and installing window screens. Prevent mosquito breeding by eliminating standing water in and around homes.
+When to Seek Care: Seek immediate care at a primary health center if you experience high fever with chills. Early diagnosis using blood smear tests or Rapid Diagnostic Tests (RDT) is crucial, as malaria can progress to severe anemia or cerebral malaria if untreated.
+
+3. Dengue
+Dengue is a viral infection transmitted to humans through the bite of infected Aedes aegypti mosquitoes. Outbreaks occur frequently during and post-monsoon seasons across India.
+Symptoms: High fever (104°F/40°C), severe headache, pain behind the eyes, joint and muscle pain, nausea, vomiting, swollen glands, and a characteristic skin rash.
+Prevention: Avoid mosquito bites using repellents and protective clothing. Aedes mosquitoes bite primarily during the day. Clean and empty water storage containers weekly, as these mosquitoes breed in clean standing water.
+When to Seek Care: Dengue can progress to Dengue Hemorrhagic Fever (DHF), a medical emergency. Seek immediate care if warning signs appear: severe abdominal pain, persistent vomiting, bleeding gums, blood in vomit, rapid breathing, or sudden platelet drops. Do not take aspirin or ibuprofen; use paracetamol for fever.
+
+4. Diarrhea and Gastrointestinal Infections
+Diarrheas are common waterborne infections resulting in frequent, loose, or watery stools, caused by viruses, bacteria, or parasites from contaminated food or water.
+Symptoms: Frequent loose stools, abdominal cramps, bloating, nausea, vomiting, fever, and dehydration.
+Prevention: Drink clean, purified, or boiled water. Wash hands thoroughly with soap before preparing or eating food, and after using the toilet. Wash fruits and vegetables before consumption. Eat hot, freshly cooked food.
+When to Seek Care: The primary danger is dehydration. Administer Oral Rehydration Salts (ORS) and Zinc supplements immediately. Seek urgent medical care if there is blood in the stool, high fever, persistent vomiting preventing fluid intake, dry mouth, extreme thirst, or lack of urination.
+
+5. Tuberculosis (TB)
+Tuberculosis is a major public health concern in India. It is a contagious bacterial infection caused by Mycobacterium tuberculosis, spreading through the air when an infected person coughs or sneezes.
+Symptoms: Persistent cough lasting more than 2 weeks, chest pain, coughing up blood or sputum, unexplained weight loss, fatigue, fever (especially evening rise of temperature), and night sweats.
+Prevention: BCG vaccination at birth provides protection. Ensure good ventilation in living areas. Patients with active TB must practice cough etiquette (covering mouth and nose) and adhere strictly to their prescribed treatment regimen (DOTS) to prevent spreading and drug resistance.
+When to Seek Care: Consult a doctor immediately if a cough lasts more than 2 weeks. TB is fully curable with free medications provided under the National Tuberculosis Elimination Program (NTEP). Adherence to the full 6-to-9-month treatment course is mandatory.

@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+python-dotenv
+langchain
+langchain-community
+faiss-cpu
+sentence-transformers
+requests
+twilio
+supabase
+redis
+groq
+langchain-groq
+langdetect
+deep-translator
+python-multipart
