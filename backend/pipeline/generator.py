@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_community.llms import Ollama
 from langchain_core.prompts import PromptTemplate
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
+from langchain_classic.chains import ConversationalRetrievalChain
+from langchain_classic.memory import ConversationBufferMemory
 import uuid
 
 SESSION_MEMORIES = {}
