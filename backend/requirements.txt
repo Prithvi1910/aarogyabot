@@ -11,6 +11,7 @@ supabase
 redis
 groq
 langchain-groq
+langchain-classic
 langdetect
 deep-translator
 python-multipart
