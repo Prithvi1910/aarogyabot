@@ -34,3 +34,19 @@ app.include_router(facilities_router)
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.on_event("startup")
+async def startup_event():
+    # Build PHC database if it doesn't exist
+    if not os.path.exists("data/phc_database.sqlite"):
+        print("Building PHC database...")
+        import subprocess
+        subprocess.run(["python", "data/build_phc_db.py"])
+        print("PHC database built")
+
+    # Build FAISS index if it doesn't exist
+    if not os.path.exists("data/faiss_index"):
+        print("Building FAISS index...")
+        from pipeline.retriever import build_index
+        build_index()
+        print("FAISS index built")
