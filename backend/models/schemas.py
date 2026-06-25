@@ -16,5 +16,3 @@ class ChatResponse(BaseModel):
     reply: str
     triage: Dict[str, Any]
     facilities: List[FacilityResult]
-    session_id: str
-
