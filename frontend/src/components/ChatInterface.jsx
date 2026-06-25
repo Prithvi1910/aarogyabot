@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Heart, Send, Mic, MicOff } from 'lucide-react'
+import { Heart, Send, Mic, MicOff, FileText, X, Download } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import TriageCard from './TriageCard'
 import FacilityCard from './FacilityCard'
@@ -29,6 +29,11 @@ function ChatInterface() {
   const [sessionId, setSessionId] = useState(null)
   const [showQuickReplies, setShowQuickReplies] = useState(true)
   const messagesEndRef = useRef(null)
+
+  // Health Report state
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const [reportData, setReportData] = useState(null)
+  const [reportToast, setReportToast] = useState('')
 
   // Speech Recognition State
   const [isSupported, setIsSupported] = useState(false)
@@ -175,6 +180,43 @@ function ChatInterface() {
     }
   }
 
+  const generateHealthReport = async () => {
+    if (!sessionId || isGeneratingReport) return
+    setIsGeneratingReport(true)
+    setReportToast('')
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/chat/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId })
+      })
+      if (!response.ok) throw new Error('Report generation failed')
+      const data = await response.json()
+      setReportData(data)
+    } catch (err) {
+      console.error('Report error:', err)
+      setReportToast('Could not generate report')
+      setTimeout(() => setReportToast(''), 3000)
+    } finally {
+      setIsGeneratingReport(false)
+    }
+  }
+
+  const downloadReport = () => {
+    if (!reportData) return
+    const blob = new Blob([reportData.report], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'AarogyaBot_Health_Report.txt'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // Count user messages to decide when to show the report button
+  const userMessageCount = messages.filter(m => m.role === 'user').length
+
   return (
     <div className="flex flex-col h-full bg-gray-50 relative min-h-[500px]">
       {/* Sticky Header */}
@@ -226,6 +268,81 @@ function ChatInterface() {
           sendMessage(text)
         }}
       />
+
+      {/* Floating Health Report Button — appears after 3+ user messages */}
+      {userMessageCount >= 3 && sessionId && (
+        <button
+          id="generate-report-btn"
+          onClick={generateHealthReport}
+          disabled={isGeneratingReport}
+          className="fixed bottom-28 right-4 z-20 bg-green-700 hover:bg-green-800 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-full px-4 py-2 text-sm shadow-lg flex items-center gap-2 transition-colors"
+          aria-label="Generate health report"
+        >
+          <FileText className="w-4 h-4" />
+          {isGeneratingReport ? 'Generating...' : 'Health Report'}
+        </button>
+      )}
+
+      {/* Error Toast */}
+      {reportToast && (
+        <div className="fixed bottom-40 right-4 z-30 bg-red-600 text-white text-sm px-4 py-2 rounded-full shadow-lg animate-fade-in">
+          {reportToast}
+        </div>
+      )}
+
+      {/* Health Report Modal */}
+      {reportData && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Health Summary Report"
+        >
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 flex flex-col gap-4 max-h-[80vh]">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-green-700 font-bold text-lg flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Your Health Summary
+              </h2>
+              <button
+                onClick={() => setReportData(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Generated timestamp */}
+            <p className="text-xs text-gray-400">Generated: {reportData.generated_at}</p>
+
+            {/* Report Body */}
+            <div className="overflow-y-auto flex-1 border border-gray-100 rounded-lg bg-gray-50 p-4">
+              <pre className="text-gray-700 text-sm whitespace-pre-wrap font-sans leading-relaxed">
+                {reportData.report}
+              </pre>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 justify-end pt-1">
+              <button
+                onClick={downloadReport}
+                className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white rounded-full px-4 py-2 text-sm transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Download as Text
+              </button>
+              <button
+                onClick={() => setReportData(null)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full px-4 py-2 text-sm transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sticky Input Bar */}
       <footer className="sticky bottom-0 bg-white border-t border-gray-200 p-3 flex flex-col gap-2">

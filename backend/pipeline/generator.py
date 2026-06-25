@@ -182,3 +182,52 @@ async def stream_answer(query: str, history: list = []) -> AsyncGenerator[str, N
             yield "I am sorry, I am having trouble answering right now. Please visit your nearest PHC."
 
 
+def generate_health_report(conversation: list) -> str:
+    """
+    Takes conversation history as a flat list of alternating user/assistant strings.
+    Builds a structured health summary prompt and calls the Groq LLM directly (no RAG).
+    Returns a formatted report string.
+    """
+    try:
+        if not conversation:
+            return "No conversation history available to generate a report."
+
+        # Format the conversation into a readable transcript
+        transcript_lines = []
+        for i in range(0, len(conversation), 2):
+            user_msg = conversation[i] if i < len(conversation) else ""
+            bot_msg = conversation[i + 1] if i + 1 < len(conversation) else ""
+            if user_msg:
+                transcript_lines.append(f"Patient: {user_msg}")
+            if bot_msg:
+                transcript_lines.append(f"Health Assistant: {bot_msg}")
+
+        transcript = "\n".join(transcript_lines)
+
+        report_prompt = (
+            "Based on this conversation between a patient and a health assistant, "
+            "generate a concise health summary report with these sections:\n\n"
+            "PATIENT SYMPTOMS: (list all symptoms mentioned)\n"
+            "DURATION & SEVERITY: (extract any time/severity info)\n"
+            "TRIAGE LEVEL: (Self-care / Visit PHC / Emergency)\n"
+            "HOME CARE ADVISED: (list home care steps given)\n"
+            "WHEN TO SEEK CARE: (specific warning signs to watch for)\n"
+            "NEAREST FACILITY: (placeholder: Visit your nearest PHC)\n\n"
+            "Keep it simple, in plain English, suitable for showing to a doctor. "
+            "Maximum 200 words.\n\n"
+            f"Conversation:\n{transcript}\n\n"
+            "Health Summary Report:"
+        )
+
+        llm = get_llm()
+        response = llm.invoke(report_prompt)
+        if hasattr(response, "content"):
+            return response.content.strip()
+        return str(response).strip()
+
+    except Exception as e:
+        print(f"Error in generate_health_report: {e}")
+        return (
+            "Could not generate health report at this time.\n"
+            "Please visit your nearest PHC and describe your symptoms to the doctor."
+        )

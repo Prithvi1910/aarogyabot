@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import uuid4
+from datetime import datetime
+from pydantic import BaseModel
 
 # Import schemas and DB helper from models
 from models import get_db, ChatRequest, ChatResponse, FacilityResult
@@ -15,6 +17,7 @@ from pipeline import (
     get_answer,
     get_answer_with_history,
 )
+from pipeline.generator import generate_health_report
 
 from routers.facilities import get_facilities_by_pincode
 
@@ -113,3 +116,22 @@ def post_triage_symptoms(payload: ChatRequest):
     # - Implement triage logic using triage pipeline component
     raise HTTPException(status_code=501, detail="Endpoint not implemented yet.")
 
+
+class ReportRequest(BaseModel):
+    session_id: str
+
+
+@router.post("/report")
+def post_generate_report(payload: ReportRequest):
+    """
+    Generate a structured health summary report from a session's conversation history.
+    """
+    history = SESSION_STORE.get(payload.session_id)
+    if not history:
+        raise HTTPException(status_code=404, detail="No conversation found for this session.")
+
+    report = generate_health_report(history)
+    return {
+        "report": report,
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
