@@ -1,0 +1,18 @@
+Diabetes and Hypertension: Core Health Guide
+
+Understanding Diabetes Mellitus: Type 1 vs Type 2
+Diabetes Mellitus is a metabolic condition where the body cannot properly manage blood glucose levels.
+Type 1 Diabetes:
+This is an autoimmune condition where the body's immune system attacks and destroys the insulin-producing cells in the pancreas. It typically develops in children or young adults. Symptoms include rapid weight loss, extreme thirst (polydipsia), frequent urination (polyuria), extreme hunger (polyphagia), and fatigue. Risk factors are primarily genetic. Management requires lifelong daily insulin therapy, blood sugar monitoring, and a balanced diet. Warning signs of emergency include diabetic ketoacidosis (DKA) marked by confusion, rapid breathing, fruit-scented breath, nausea, and vomiting.
+Type 2 Diabetes:
+This is a condition where the body becomes resistant to insulin or doesn't produce enough of it. It typically develops in adults, though it is increasingly seen in younger people. Risk factors include obesity, physical inactivity, poor diet, older age, and family history. Symptoms develop gradually and include blurred vision, slow-healing sores, frequent infections, fatigue, and increased thirst/urination. Management involves lifestyle modifications (healthy diet, weight loss, regular exercise) and oral medications or insulin. Warning signs of severe complications include extremely high blood sugar levels causing confusion, drowsiness, or loss of consciousness (Hyperosmolar Hyperglycemic State).
+
+Understanding Hypertension (High Blood Pressure)
+Hypertension occurs when the force of blood pushing against the artery walls is consistently too high (usually 140/90 mmHg or above).
+Symptoms: Often called the "silent killer" because it typically has no symptoms. However, severe hypertension can cause headaches, nosebleeds, dizziness, chest pain, and shortness of breath.
+Risk Factors: High salt intake, lack of physical activity, obesity, excessive alcohol, stress, smoking, age, and genetics.
+Lifestyle Changes: Reducing salt/sodium intake, eating a diet rich in fruits and vegetables, maintaining a healthy weight, exercising regularly (like walking briskly for 30 minutes daily), limiting alcohol, and avoiding tobacco.
+When to Seek Care: Seek immediate medical attention if you experience a hypertensive crisis (blood pressure over 180/120 mmHg) accompanied by severe chest pain, shortness of breath, back pain, numbness, weakness, or difficulty speaking.
+
+Interaction Between Diabetes and Hypertension
+Diabetes and hypertension frequently co-exist, and their combination significantly increases the risk of cardiovascular diseases, kidney failure, and stroke. Both conditions damage blood vessels and kidneys. High blood pressure accelerates diabetic eye disease (retinopathy) and kidney disease (nephropathy). Managing both conditions simultaneously through a combination of medication, healthy diet, and physical activity is critical. Target blood pressure for patients with diabetes is usually lower (under 130/80 mmHg) to protect vital organs. Regular screening of blood sugar and blood pressure is essential for early detection and preventing long-term complications.

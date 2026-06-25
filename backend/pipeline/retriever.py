@@ -1,3 +1,4 @@
+# After adding new health docs, delete data/faiss_index/ and run build_index() to rebuild
 import os
 from typing import List, Dict, Any
 from langchain_community.vectorstores import FAISS

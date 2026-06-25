@@ -1,0 +1,20 @@
+Respiratory Diseases and Health Guide
+
+Differentiating Common Respiratory Conditions
+It is important to understand the differences between common respiratory infections to ensure correct and timely treatment.
+1. Common Cold: A mild viral infection of the upper respiratory tract. Symptoms include a runny or stuffy nose, sneezing, mild sore throat, and a low-grade fever. It usually resolves within a week.
+2. Influenza (Flu): A contagious viral infection affecting the nose, throat, and lungs. Symptoms appear suddenly and are more severe than a cold: high fever, body aches, fatigue, dry cough, and headache.
+3. COVID-19: Caused by the SARS-CoV-2 virus. Symptoms range from mild to severe, including fever, dry cough, shortness of breath, loss of taste or smell, fatigue, and body aches. It can lead to severe pneumonia.
+4. Pneumonia: An infection that inflames the air sacs in one or both lungs, which may fill with fluid or pus. Symptoms include a productive cough (with phlegm), fever, shaking chills, and difficulty breathing.
+5. Tuberculosis (TB): A bacterial infection primarily affecting the lungs. It is chronic and slow-developing. Key symptoms are a persistent cough lasting more than 2-3 weeks, coughing up blood, unexplained weight loss, fever, and night sweats.
+
+When a Cough Becomes Serious
+A cough is a common symptom of many minor conditions, but it can indicate a serious medical problem under certain circumstances. You should visit a doctor or a Primary Health Centre (PHC) immediately if you experience:
+- A cough that lasts for 3 weeks or longer.
+- Coughing up blood or blood-streaked sputum (hemoptysis).
+- A cough accompanied by unexplained weight loss and heavy night sweats (classic signs of Tuberculosis).
+- Difficulty breathing, wheezing, or chest pain during coughing.
+- High fever that does not go down with paracetamol.
+
+Air Quality and Respiratory Health in Rural India
+In rural India, air quality is a significant risk factor for respiratory diseases. Indoor air pollution is primarily caused by burning biomass fuels (wood, crop residue, dung cakes) in traditional cookstoves (chulhas) for cooking and heating. This produces toxic smoke containing carbon monoxide and particulate matter, leading to Chronic Obstructive Pulmonary Disease (COPD), asthma, and lung infections, especially in women and children. Outdoor air quality is affected by agricultural burning, dust, and nearby industries. To protect respiratory health, communities should adopt clean cooking options (like LPG), ensure proper ventilation in kitchens, and avoid burning crop waste near residential areas.
