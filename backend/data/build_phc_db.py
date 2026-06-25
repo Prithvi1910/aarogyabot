@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import random
 
 def build_database():
     db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "phc_database.sqlite")
@@ -26,35 +27,71 @@ def build_database():
     # Clear existing records (if any) to avoid duplication on re-run
     cursor.execute("DELETE FROM facilities")
     
-    # Sample PHC/CHC records across 5 Indian states
-    sample_records = [
-        # Gujarat
-        ("Primary Health Centre, Sanand", "PHC", "Ahmedabad", "Gujarat", "382110", 22.9855, 72.3789, "+91 79 23250101"),
-        ("Community Health Centre, Kalol", "CHC", "Gandhinagar", "Gujarat", "382721", 23.2533, 72.4967, "+91 2764 223344"),
-        ("Primary Health Centre, Padra", "PHC", "Vadodara", "Gujarat", "391440", 22.2394, 73.0833, "+91 2662 222111"),
-        ("Community Health Centre, Gondal", "CHC", "Rajkot", "Gujarat", "360311", 21.9619, 70.7936, "+91 2825 220022"),
-        # Maharashtra
-        ("Primary Health Centre, Mulshi", "PHC", "Pune", "Maharashtra", "412108", 18.5278, 73.5122, "+91 20 25678901"),
-        ("Community Health Centre, Karjat", "CHC", "Raigad", "Maharashtra", "410201", 18.9102, 73.3278, "+91 2148 222123"),
-        ("Primary Health Centre, Hingna", "PHC", "Nagpur", "Maharashtra", "441110", 21.0967, 78.9667, "+91 7104 220300"),
-        ("Community Health Centre, Sinnar", "CHC", "Nashik", "Maharashtra", "422103", 19.8456, 74.0300, "+91 2551 220102"),
-        # Rajasthan
-        ("Primary Health Centre, Chomu", "PHC", "Jaipur", "Rajasthan", "303702", 27.1706, 75.7208, "+91 1423 224466"),
-        ("Community Health Centre, Luni", "CHC", "Jodhpur", "Rajasthan", "342802", 26.2167, 73.0167, "+91 291 2720202"),
-        ("Primary Health Centre, Girwa", "PHC", "Udaipur", "Rajasthan", "313001", 24.5800, 73.7200, "+91 294 2410300"),
-        ("Community Health Centre, Kishangarh", "CHC", "Ajmer", "Rajasthan", "305801", 26.5700, 74.8700, "+91 1463 245123"),
-        # Tamil Nadu
-        ("Primary Health Centre, Tambaram", "PHC", "Chengalpattu", "Tamil Nadu", "600045", 12.9229, 80.1275, "+91 44 22391000"),
-        ("Community Health Centre, Sulur", "CHC", "Coimbatore", "Tamil Nadu", "641402", 11.0267, 77.1264, "+91 422 2689200"),
-        ("Primary Health Centre, Tirupparankundram", "PHC", "Madurai", "Tamil Nadu", "625005", 9.8789, 78.0717, "+91 452 2482301"),
-        ("Community Health Centre, Omalur", "CHC", "Salem", "Tamil Nadu", "636384", 11.7333, 78.0494, "+91 4290 220050"),
-        # Karnataka
-        ("Primary Health Centre, Yelahanka", "PHC", "Bengaluru Urban", "Karnataka", "560064", 13.1008, 77.5963, "+91 80 28461023"),
-        ("Community Health Centre, Nanjangud", "CHC", "Mysuru", "Karnataka", "571301", 12.1172, 76.6803, "+91 8221 226244"),
-        ("Primary Health Centre, Kundagola", "PHC", "Dharwad", "Karnataka", "581113", 15.2575, 75.3028, "+91 836 2447100"),
-        ("Community Health Centre, Ullal", "CHC", "Dakshina Kannada", "Karnataka", "575020", 12.8028, 74.8519, "+91 824 2465300")
-    ]
+    random.seed(42)
     
+    states_info = {
+        "Gujarat": {"pin_start": 36, "pin_end": 39, "lat_min": 20.0, "lat_max": 24.0, "lon_min": 68.0, "lon_max": 74.0, "districts": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Gandhinagar"]},
+        "Maharashtra": {"pin_start": 40, "pin_end": 44, "lat_min": 15.0, "lat_max": 22.0, "lon_min": 72.0, "lon_max": 80.0, "districts": ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Raigad"]},
+        "Rajasthan": {"pin_start": 30, "pin_end": 34, "lat_min": 23.0, "lat_max": 30.0, "lon_min": 69.0, "lon_max": 78.0, "districts": ["Jaipur", "Jodhpur", "Udaipur", "Ajmer", "Bikaner", "Kota"]},
+        "Tamil Nadu": {"pin_start": 60, "pin_end": 64, "lat_min": 8.0, "lat_max": 13.0, "lon_min": 76.0, "lon_max": 80.0, "districts": ["Chennai", "Coimbatore", "Madurai", "Salem", "Tiruchirappalli", "Chengalpattu"]},
+        "Karnataka": {"pin_start": 56, "pin_end": 59, "lat_min": 11.0, "lat_max": 18.0, "lon_min": 74.0, "lon_max": 78.0, "districts": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru", "Belagavi", "Dharwad"]},
+        "Uttar Pradesh": {"pin_start": 20, "pin_end": 28, "lat_min": 23.0, "lat_max": 30.0, "lon_min": 77.0, "lon_max": 84.0, "districts": ["Lucknow", "Kanpur", "Varanasi", "Agra", "Prayagraj", "Meerut"]},
+        "Madhya Pradesh": {"pin_start": 45, "pin_end": 48, "lat_min": 21.0, "lat_max": 26.0, "lon_min": 74.0, "lon_max": 82.0, "districts": ["Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain", "Sagar"]},
+        "West Bengal": {"pin_start": 70, "pin_end": 74, "lat_min": 21.0, "lat_max": 27.0, "lon_min": 85.0, "lon_max": 89.0, "districts": ["Kolkata", "Howrah", "Darjeeling", "Malda", "Murshidabad", "Hooghly"]},
+        "Punjab": {"pin_start": 14, "pin_end": 16, "lat_min": 29.0, "lat_max": 32.0, "lon_min": 73.0, "lon_max": 76.0, "districts": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali"]},
+        "Kerala": {"pin_start": 67, "pin_end": 69, "lat_min": 8.0, "lat_max": 12.0, "lon_min": 74.0, "lon_max": 77.0, "districts": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Kannur"]},
+        "Andhra Pradesh": {"pin_start": 50, "pin_end": 53, "lat_min": 12.0, "lat_max": 19.0, "lon_min": 76.0, "lon_max": 84.0, "districts": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Tirupati"]},
+        "Odisha": {"pin_start": 75, "pin_end": 77, "lat_min": 17.0, "lat_max": 22.0, "lon_min": 81.0, "lon_max": 87.0, "districts": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri", "Sambalpur", "Balasore"]},
+        "Assam": {"pin_start": 78, "pin_end": 78, "lat_min": 24.0, "lat_max": 28.0, "lon_min": 89.0, "lon_max": 96.0, "districts": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon", "Tezpur"]},
+        "Bihar": {"pin_start": 80, "pin_end": 85, "lat_min": 24.0, "lat_max": 27.0, "lon_min": 83.0, "lon_max": 88.0, "districts": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga"]},
+        "Jharkhand": {"pin_start": 82, "pin_end": 83, "lat_min": 22.0, "lat_max": 25.0, "lon_min": 83.0, "lon_max": 87.0, "districts": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh"]}
+    }
+
+    sample_records = []
+    
+    for state, info in states_info.items():
+        for _ in range(33):
+            dist = random.choice(info["districts"])
+            ftype = random.choices(["PHC", "CHC", "District Hospital"], weights=[0.6, 0.3, 0.1])[0]
+            if ftype == "PHC":
+                name = f"Primary Health Centre, {dist} Rural"
+            elif ftype == "CHC":
+                name = f"Community Health Centre, {dist} Area"
+            else:
+                name = f"District Hospital, {dist}"
+                
+            pin_prefix = random.randint(info["pin_start"], info["pin_end"])
+            pincode = f"{pin_prefix}{random.randint(1000, 9999)}"
+            
+            lat = random.uniform(info["lat_min"], info["lat_max"])
+            lon = random.uniform(info["lon_min"], info["lon_max"])
+            
+            phone = f"+91 {random.randint(111, 999)} {random.randint(1000000, 9999999)}"
+            
+            sample_records.append((name, ftype, dist, state, pincode, round(lat, 4), round(lon, 4), phone))
+            
+    while len(sample_records) < 500:
+        state = random.choice(list(states_info.keys()))
+        info = states_info[state]
+        dist = random.choice(info["districts"])
+        ftype = random.choices(["PHC", "CHC", "District Hospital"], weights=[0.6, 0.3, 0.1])[0]
+        if ftype == "PHC":
+            name = f"Primary Health Centre, {dist} Rural"
+        elif ftype == "CHC":
+            name = f"Community Health Centre, {dist} Area"
+        else:
+            name = f"District Hospital, {dist}"
+            
+        pin_prefix = random.randint(info["pin_start"], info["pin_end"])
+        pincode = f"{pin_prefix}{random.randint(1000, 9999)}"
+        
+        lat = random.uniform(info["lat_min"], info["lat_max"])
+        lon = random.uniform(info["lon_min"], info["lon_max"])
+        
+        phone = f"+91 {random.randint(111, 999)} {random.randint(1000000, 9999999)}"
+        
+        sample_records.append((name, ftype, dist, state, pincode, round(lat, 4), round(lon, 4), phone))
+
     cursor.executemany("""
         INSERT INTO facilities (name, type, district, state, pincode, lat, lon, phone)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -62,12 +99,13 @@ def build_database():
     
     conn.commit()
     
-    # Verify records inserted
+    cursor.execute("SELECT COUNT(DISTINCT state) FROM facilities")
+    states_count = cursor.fetchone()[0]
     cursor.execute("SELECT COUNT(*) FROM facilities")
     count = cursor.fetchone()[0]
     
     conn.close()
-    print(f"Database built with {count} records")
+    print(f"Database built with {count} records across {states_count} states")
 
 if __name__ == "__main__":
     build_database()

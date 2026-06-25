@@ -18,8 +18,22 @@ function LandingPage({ onStart }) {
       </p>
 
       {/* Feature Pills */}
-      <div className="flex flex-wrap justify-center gap-2 mt-6">
-        {["10+ Languages", "300+ Health Centers", "24/7 Available"].map((pill) => (
+      <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-lg">
+        {[
+          "Hindi", "Gujarati", "Marathi", "Tamil", "Telugu", "English",
+          "Punjabi", "Urdu", "Odia", "Assamese"
+        ].map((lang) => (
+          <span
+            key={lang}
+            className="bg-white/20 text-white rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm"
+          >
+            {lang}
+          </span>
+        ))}
+      </div>
+      
+      <div className="flex flex-wrap justify-center gap-2 mt-3">
+        {["500+ health centers across 15 Indian states", "24/7 Available"].map((pill) => (
           <span
             key={pill}
             className="bg-white/20 text-white rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm"
@@ -34,7 +48,7 @@ function LandingPage({ onStart }) {
         {[
           { number: "65%", label: "Rural Population Served" },
           { number: "10+", label: "Indian Languages" },
-          { number: "300+", label: "PHCs Mapped" },
+          { number: "500+", label: "PHCs Mapped" },
         ].map(({ number, label }) => (
           <div key={label} className="flex flex-col items-center">
             <span className="text-3xl font-bold text-white">{number}</span>

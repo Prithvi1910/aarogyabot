@@ -11,7 +11,11 @@ LANG_MAP = {
     "bn": "Bengali",
     "kn": "Kannada",
     "ml": "Malayalam",
-    "en": "English"
+    "en": "English",
+    "pa": "Punjabi",
+    "ur": "Urdu",
+    "or": "Odia",
+    "as": "Assamese"
 }
 
 # List of common Hinglish/romanized Hindi words for language detection
@@ -26,6 +30,10 @@ GUJARATI_WORDS = {"che", "mane", "taav", "su", "kem", "majama", "saru", "kharab"
 TAMIL_WORDS = {"irukku", "enaku", "vanthuruchu", "eppadi", "illa", "vali", "jurama"}
 TELUGU_WORDS = {"undi", "naaku", "vachindi", "ela", "ledu", "noppi", "jwaram"}
 MARATHI_WORDS = {"aahe", "mala", "zala", "kasa", "nahi", "dukhi", "taap"}
+PUNJABI_WORDS = {"hai", "menu", "mera", "tera", "kida", "kiddan", "thoda", "bahut", "nahi", "dard", "bukhar", "theek", "karo", "jao", "pani", "khana", "dawai"}
+URDU_WORDS = {"hai", "mujhe", "mera", "teri", "kya", "nahi", "dard", "bukhar", "dawai", "tabiyat", "theek", "achha", "kyun", "abhi", "pani", "sar", "bimari"}
+ODIA_WORDS = {"achi", "mora", "tuma", "kana", "nahi", "dukha", "jwara", "bhala", "kara", "jiba", "pani", "khana", "dawai", "thanda"}
+ASSAMESE_WORDS = {"ase", "mur", "tomar", "ki", "nai", "buja", "jor", "bhal", "kora", "jai", "pani", "khabar", "dukh", "osodh"}
 
 def is_hinglish(text: str) -> bool:
     """
@@ -52,6 +60,14 @@ def detect_romanized_language(text: str) -> Optional[str]:
         return "te"
     if len(word_set & MARATHI_WORDS) >= 2:
         return "mr"
+    if len(word_set & PUNJABI_WORDS) >= 2:
+        return "pa"
+    if len(word_set & URDU_WORDS) >= 2:
+        return "ur"
+    if len(word_set & ODIA_WORDS) >= 2:
+        return "or"
+    if len(word_set & ASSAMESE_WORDS) >= 2:
+        return "as"
     
     return None
 
