@@ -131,9 +131,12 @@ function ChatInterface() {
     setInputText('')
     setIsLoading(true)
 
+    let useFallback = false
+    const botMsgId = `bot-${Date.now()}`
+
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/chat/`, {
+      const response = await fetch(`${apiUrl}/chat/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -141,36 +144,124 @@ function ChatInterface() {
         body: JSON.stringify({ message: text, session_id: sessionId })
       })
 
-      if (!response.ok) {
-        throw new Error('API Request Failed')
+      if (!response.ok || !response.body) {
+        throw new Error('Streaming failed, using fallback')
       }
 
-      const data = await response.json()
-      
-      if (data.session_id && sessionId === null) {
-        setSessionId(data.session_id)
-      }
-      
-      const botMsg = {
-        id: `bot-${Date.now()}`,
+      // Add empty bot message that will be updated in real time
+      const initialBotMsg = {
+        id: botMsgId,
         role: 'bot',
-        text: data.reply,
-        triage: data.triage && Object.keys(data.triage).length > 0 ? data.triage : null,
-        facilities: data.facilities || []
-      }
-
-      setMessages(prev => [...prev, botMsg])
-    } catch (error) {
-      console.error('Error fetching chat response:', error)
-      const errorMsg = {
-        id: `error-${Date.now()}`,
-        role: 'bot',
-        text: "I am sorry, I am having trouble answering right now. Please visit your nearest PHC.",
+        text: '',
         triage: null,
-        facilities: []
+        facilities: [],
+        isStreaming: true
       }
-      setMessages(prev => [...prev, errorMsg])
-    } finally {
+      setMessages(prev => [...prev, initialBotMsg])
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let accumulatedText = ''
+      let buffer = ''
+
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          const cleanedLine = line.trim()
+          if (!cleanedLine.startsWith('data: ')) continue
+          const dataContent = cleanedLine.slice(6).trim()
+          if (!dataContent) continue
+
+          if (dataContent.startsWith('[DONE]')) {
+            const jsonStr = dataContent.slice(6)
+            try {
+              const parsed = JSON.parse(jsonStr)
+              if (parsed.session_id && sessionId === null) {
+                setSessionId(parsed.session_id)
+              }
+              setMessages(prev => prev.map(msg => {
+                if (msg.id === botMsgId) {
+                  return {
+                    ...msg,
+                    triage: parsed.triage && Object.keys(parsed.triage).length > 0 ? parsed.triage : null,
+                    facilities: parsed.facilities || [],
+                    isStreaming: false
+                  }
+                }
+                return msg
+              }))
+            } catch (e) {
+              console.error('Error parsing [DONE] metadata:', e)
+              setMessages(prev => prev.map(msg => msg.id === botMsgId ? { ...msg, isStreaming: false } : msg))
+            }
+          } else {
+            accumulatedText += dataContent
+            setMessages(prev => prev.map(msg => {
+              if (msg.id === botMsgId) {
+                return { ...msg, text: accumulatedText }
+              }
+              return msg
+            }))
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Streaming error, falling back to /chat:', error)
+      useFallback = true
+    }
+
+    if (useFallback) {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+        const response = await fetch(`${apiUrl}/chat/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ message: text, session_id: sessionId })
+        })
+
+        if (!response.ok) {
+          throw new Error('API Request Failed')
+        }
+
+        const data = await response.json()
+        
+        if (data.session_id && sessionId === null) {
+          setSessionId(data.session_id)
+        }
+        
+        const botMsg = {
+          id: botMsgId,
+          role: 'bot',
+          text: data.reply,
+          triage: data.triage && Object.keys(data.triage).length > 0 ? data.triage : null,
+          facilities: data.facilities || [],
+          isStreaming: false
+        }
+
+        setMessages(prev => [...prev, botMsg])
+      } catch (fallbackError) {
+        console.error('Fallback error:', fallbackError)
+        const errorMsg = {
+          id: `error-${Date.now()}`,
+          role: 'bot',
+          text: "I am sorry, I am having trouble answering right now. Please visit your nearest PHC.",
+          triage: null,
+          facilities: [],
+          isStreaming: false
+        }
+        setMessages(prev => [...prev, errorMsg])
+      } finally {
+        setIsLoading(false)
+      }
+    } else {
       setIsLoading(false)
     }
   }
@@ -189,7 +280,19 @@ function ChatInterface() {
       <main className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar">
         {messages.map((msg) => (
           <div key={msg.id} className="flex flex-col gap-2">
-            <MessageBubble role={msg.role} text={msg.text} />
+            <MessageBubble
+              role={msg.role}
+              text={
+                msg.isStreaming ? (
+                  <>
+                    {msg.text}
+                    <span className="animate-pulse w-1 h-4 bg-gray-400 inline-block ml-1" />
+                  </>
+                ) : (
+                  msg.text
+                )
+              }
+            />
             {msg.role === 'bot' && msg.triage && (
               <div className="w-full max-w-[80%] animate-fade-in">
                 <TriageCard triage={msg.triage} />

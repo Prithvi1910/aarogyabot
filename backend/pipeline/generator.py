@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Any
+from typing import List, Dict, Any, AsyncGenerator
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain_community.llms import Ollama
@@ -133,4 +133,52 @@ def get_answer_with_history(query: str, history: list = []) -> str:
     except Exception as e:
         print(f"Error in get_answer_with_history: {e}")
         return "I am sorry, I am having trouble answering right now. Please visit your nearest PHC."
+
+async def stream_answer(query: str, history: list = []) -> AsyncGenerator[str, None]:
+    """
+    Async generator that yields response chunks from ChatGroq with streaming.
+    """
+    try:
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key or not groq_api_key.strip():
+            raise ValueError("GROQ_API_KEY not set")
+            
+        retriever = get_retriever()
+        docs = retriever.invoke(query)
+        context_str = "\n\n".join([doc.page_content for doc in docs])
+        
+        prepended_query = query
+        if history:
+            trimmed_history = history[-6:]
+            formatted_history = "Previous conversation:\n"
+            for i in range(0, len(trimmed_history), 2):
+                if i + 1 < len(trimmed_history):
+                    formatted_history += f"User: {trimmed_history[i]}\nAssistant: {trimmed_history[i+1]}\n"
+            prepended_query = formatted_history + query
+            
+        prompt = HEALTH_PROMPT.format(context=context_str, question=prepended_query)
+        
+        llm = ChatGroq(
+            model="llama-3.1-8b-instant",
+            temperature=0.2,
+            groq_api_key=groq_api_key.strip(),
+            streaming=True
+        )
+        
+        async for chunk in llm.astream(prompt):
+            content = chunk.content if hasattr(chunk, "content") else str(chunk)
+            if content:
+                yield content
+                
+    except Exception as e:
+        print(f"Streaming failed, falling back to non-streaming: {e}")
+        try:
+            if history:
+                ans = get_answer_with_history(query, history)
+            else:
+                ans = get_answer(query)
+            yield ans
+        except Exception:
+            yield "I am sorry, I am having trouble answering right now. Please visit your nearest PHC."
+
 
