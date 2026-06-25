@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Heart, Send, Mic, MicOff, FileText, X, Download } from 'lucide-react'
+import { HeartPulse, Send, Mic, MicOff, FileText, X, Download } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import TriageCard from './TriageCard'
 import FacilityCard from './FacilityCard'
@@ -220,15 +220,23 @@ function ChatInterface() {
   return (
     <div className="flex flex-col h-full bg-gray-50 relative min-h-[500px]">
       {/* Sticky Header */}
-      <header className="sticky top-0 h-[56px] bg-green-700 text-white flex items-center px-4 shadow-sm z-10 justify-between">
+      <header className="sticky top-0 h-[64px] bg-green-700 text-white flex items-center px-4 shadow-md z-10 justify-between">
         <div className="flex items-center gap-2">
-          <Heart className="w-5 h-5 text-green-100 fill-green-100" aria-hidden="true" />
+          <HeartPulse className="w-6 h-6 text-green-100" aria-hidden="true" />
           <span className="font-semibold text-lg tracking-tight">AarogyaBot</span>
+        </div>
+        {/* Live indicator */}
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+          </span>
+          <span className="text-xs text-green-200 font-medium">Live</span>
         </div>
       </header>
 
       {/* Main Message List */}
-      <main className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar">
+      <main className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 chat-scroll">
         {messages.map((msg) => (
           <div key={msg.id} className="flex flex-col gap-2">
             <MessageBubble

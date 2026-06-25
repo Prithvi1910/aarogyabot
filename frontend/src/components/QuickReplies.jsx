@@ -1,25 +1,27 @@
 import React from 'react'
+import { Stethoscope, MapPin, Shield, AlertTriangle } from 'lucide-react'
+
+const CHIPS = [
+  { label: "Common Symptoms",   Icon: Stethoscope },
+  { label: "Find Nearest PHC",  Icon: MapPin },
+  { label: "Disease Prevention", Icon: Shield },
+  { label: "Emergency Signs",   Icon: AlertTriangle },
+]
 
 function QuickReplies({ onSelect, visible }) {
   if (!visible) return null
 
-  const chips = [
-    "Common Symptoms",
-    "Find Nearest PHC",
-    "Disease Prevention",
-    "Emergency Signs"
-  ]
-
   return (
     <div className="flex flex-wrap gap-2 px-4 pb-3">
-      {chips.map((chipText) => (
+      {CHIPS.map(({ label, Icon }) => (
         <button
-          key={chipText}
+          key={label}
           type="button"
-          onClick={() => onSelect(chipText)}
-          className="rounded-full border border-green-600 text-green-700 bg-white hover:bg-green-50 px-4 py-2 text-sm cursor-pointer min-h-[44px] flex items-center"
+          onClick={() => onSelect(label)}
+          className="rounded-full border border-green-600 text-green-700 bg-white hover:bg-green-50 hover:shadow-md transition-shadow px-4 py-2.5 text-sm cursor-pointer min-h-[44px] flex items-center gap-1.5"
         >
-          {chipText}
+          <Icon className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" />
+          {label}
         </button>
       ))}
     </div>
