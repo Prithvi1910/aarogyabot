@@ -201,7 +201,7 @@ function ChatInterface() {
               setMessages(prev => prev.map(msg => msg.id === botMsgId ? { ...msg, isStreaming: false } : msg))
             }
           } else {
-            accumulatedText += dataContent
+            accumulatedText += (accumulatedText && !accumulatedText.endsWith(' ') && !dataContent.startsWith(' ') ? ' ' : '') + dataContent
             setMessages(prev => prev.map(msg => {
               if (msg.id === botMsgId) {
                 return { ...msg, text: accumulatedText }
