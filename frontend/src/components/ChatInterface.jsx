@@ -3,6 +3,7 @@ import { Heart, Send, Mic, MicOff } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import TriageCard from './TriageCard'
 import FacilityCard from './FacilityCard'
+import QuickReplies from './QuickReplies'
 
 const LANGUAGES = [
   { name: 'Hindi', code: 'hi-IN' },
@@ -26,6 +27,7 @@ function ChatInterface() {
   const [inputText, setInputText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState(null)
+  const [showQuickReplies, setShowQuickReplies] = useState(true)
   const messagesEndRef = useRef(null)
 
   // Speech Recognition State
@@ -108,10 +110,11 @@ function ChatInterface() {
     }
   }
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault()
-    const text = inputText.trim()
+  const sendMessage = async (overrideText = null) => {
+    const text = (overrideText && typeof overrideText === 'string') ? overrideText.trim() : inputText.trim()
     if (!text || isLoading) return
+
+    setShowQuickReplies(false)
 
     // Stop recording if active when sending message
     if (isRecording && recognitionRef.current) {
@@ -213,6 +216,14 @@ function ChatInterface() {
         <div ref={messagesEndRef} />
       </main>
 
+      <QuickReplies
+        visible={showQuickReplies}
+        onSelect={(text) => {
+          setShowQuickReplies(false)
+          sendMessage(text)
+        }}
+      />
+
       {/* Sticky Input Bar */}
       <footer className="sticky bottom-0 bg-white border-t border-gray-200 p-3 flex flex-col gap-2">
         {isSupported && (
@@ -248,7 +259,7 @@ function ChatInterface() {
           </div>
         )}
 
-        <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+        <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex items-center gap-2">
           <input
             type="text"
             value={inputText}
