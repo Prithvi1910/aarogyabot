@@ -5,13 +5,17 @@ import TriageCard from './TriageCard'
 import FacilityCard from './FacilityCard'
 import QuickReplies from './QuickReplies'
 
-const LANGUAGES = [
-  { name: 'Hindi', code: 'hi-IN' },
-  { name: 'English', code: 'en-US' },
-  { name: 'Gujarati', code: 'gu-IN' },
-  { name: 'Tamil', code: 'ta-IN' },
-  { name: 'Telugu', code: 'te-IN' },
-  { name: 'Marathi', code: 'mr-IN' }
+const VOICE_LANGUAGES = [
+  { code: "hi-IN", label: "Hindi" },
+  { code: "gu-IN", label: "Gujarati" },
+  { code: "mr-IN", label: "Marathi" },
+  { code: "ta-IN", label: "Tamil" },
+  { code: "te-IN", label: "Telugu" },
+  { code: "en-IN", label: "English" },
+  { code: "pa-IN", label: "Punjabi" },
+  { code: "ur-IN", label: "Urdu" },
+  { code: "or-IN", label: "Odia" },
+  { code: "as-IN", label: "Assamese" }
 ]
 
 function ChatInterface() {
@@ -364,9 +368,9 @@ function ChatInterface() {
                 onChange={(e) => setRecognitionLanguage(e.target.value)}
                 className="bg-gray-50 border border-gray-300 rounded px-2 py-0.5 text-gray-700 focus:ring-1 focus:ring-green-500 focus:outline-none"
               >
-                {LANGUAGES.map((lang) => (
+                {VOICE_LANGUAGES.map((lang) => (
                   <option key={lang.code} value={lang.code}>
-                    {lang.name}
+                    {lang.label}
                   </option>
                 ))}
               </select>
