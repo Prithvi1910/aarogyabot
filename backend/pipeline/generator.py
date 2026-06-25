@@ -88,3 +88,44 @@ def generate_response(query: str, context: List[Dict[str, Any]] = None, session_
     Generates a response from the LLM based on user query and retrieved health contexts.
     """
     return get_answer(query, session_id)
+
+def get_answer_with_history(query: str, history: list = []) -> str:
+    """
+    Generate an answer using RAG and prepend conversation history to the prompt.
+    """
+    try:
+        if not history:
+            return get_answer(query)
+        
+        # Keep last 6 messages only
+        trimmed_history = history[-6:]
+        
+        # Format history
+        formatted_history = "Previous conversation:\n"
+        for i in range(0, len(trimmed_history), 2):
+            if i + 1 < len(trimmed_history):
+                formatted_history += f"User: {trimmed_history[i]}\nAssistant: {trimmed_history[i+1]}\n"
+                
+        # Prepend formatted history to the question in the prompt
+        prepended_query = formatted_history + query
+        
+        llm = get_llm()
+        retriever = get_retriever()
+        
+        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+        
+        qa_chain = ConversationalRetrievalChain.from_llm(
+            llm=llm,
+            retriever=retriever,
+            memory=memory,
+            combine_docs_chain_kwargs={"prompt": HEALTH_PROMPT}
+        )
+        
+        response = qa_chain.invoke({"question": prepended_query})
+        if isinstance(response, dict):
+            return response.get("answer", "").strip()
+        return str(response).strip()
+    except Exception as e:
+        print(f"Error in get_answer_with_history: {e}")
+        return "I am sorry, I am having trouble answering right now. Please visit your nearest PHC."
+

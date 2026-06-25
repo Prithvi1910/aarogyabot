@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
+from uuid import uuid4
 
 # Import schemas and DB helper from models
 from models import get_db, ChatRequest, ChatResponse, FacilityResult
@@ -12,9 +13,12 @@ from pipeline import (
     from_english,
     classify_urgency,
     get_answer,
+    get_answer_with_history,
 )
 
 from routers.facilities import get_facilities_by_pincode
+
+SESSION_STORE = {}
 
 router = APIRouter(prefix="/chat", tags=["Chat & Triage"])
 
@@ -25,6 +29,7 @@ def post_chat_message(payload: ChatRequest, db: Session = Depends(get_db)):
     generate AI response in detected language, and save session log to DB.
     """
     detected_lang = "en"
+    session_id = payload.session_id if payload.session_id else str(uuid4())
     try:
         message = payload.message.strip()
         detected_lang = detect_language(message)
@@ -53,19 +58,36 @@ def post_chat_message(payload: ChatRequest, db: Session = Depends(get_db)):
             return ChatResponse(
                 reply=reply.strip(),
                 triage={},
-                facilities=facility_results
+                facilities=facility_results,
+                session_id=session_id
             )
         
         # Non-PIN code flow
         english_msg = to_english(message, detected_lang)
         triage = classify_urgency(english_msg)
-        answer = get_answer(english_msg, payload.session_id)
+        
+        # Look up SESSION_STORE[session_id] for history (default [])
+        history = SESSION_STORE.get(session_id, [])
+        
+        # Pass history to get_answer_with_history() instead of get_answer()
+        answer = get_answer_with_history(english_msg, history)
         translated_reply = from_english(answer, detected_lang)
+        
+        # After reply, append user message and bot reply to history
+        history.append(english_msg)
+        history.append(answer)
+        
+        # Trim history to last 6 messages
+        history = history[-6:]
+        
+        # Save back to SESSION_STORE[session_id]
+        SESSION_STORE[session_id] = history
         
         return ChatResponse(
             reply=translated_reply,
             triage=triage,
-            facilities=[]
+            facilities=[],
+            session_id=session_id
         )
         
     except Exception as e:
@@ -78,7 +100,8 @@ def post_chat_message(payload: ChatRequest, db: Session = Depends(get_db)):
         return ChatResponse(
             reply=fallback_reply,
             triage={},
-            facilities=[]
+            facilities=[],
+            session_id=session_id
         )
 
 @router.post("/triage")
