@@ -62,8 +62,8 @@ def get_retriever():
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     db = FAISS.load_local(FAISS_DIR, embeddings, allow_dangerous_deserialization=True)
     return db.as_retriever(
-        search_type="similarity_score_threshold",
-        search_kwargs={"k": 5, "score_threshold": 0.45}
+        search_type="similarity",
+        search_kwargs={"k": 5}
     )
 
 def retrieve_documents(query: str, limit: int = 5) -> List[Dict[str, Any]]:

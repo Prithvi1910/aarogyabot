@@ -30,38 +30,19 @@ GUJARATI_WORDS = {"che", "mane", "taav", "su", "kem", "majama", "saru", "kharab"
 TAMIL_WORDS = {"irukku", "enaku", "vanthuruchu", "eppadi", "illa", "vali", "jurama"}
 TELUGU_WORDS = {"undi", "naaku", "vachindi", "ela", "ledu", "noppi", "jwaram"}
 MARATHI_WORDS = {"aahe", "mala", "zala", "kasa", "nahi", "dukhi", "taap"}
-PUNJABI_WORDS = {"menu", "tenu", "kida", "kiddan", "ki haal", "sat sri akal", "tussi", "sanu", "ohna", "kithey", "kithe", "labna", "akhna", "dasna"}
+PUNJABI_WORDS = {"menu", "tenu", "kida", "kiddan", "ki haal", "sat sri akal", "tussi", "sanu", "ohna", "kithey", "kithe", "labna", "akhna", "dasna", "hanji", "paji", "karo", "veere", "kiwe", "pra", "changa", "wadhia", "sada", "tuhada"}
 URDU_WORDS = {"aapko", "unhe", "humein", "zaroor", "bilkul", "shayad", "warna", "lekin", "phir", "abhi", "matlab", "tabiyat", "sehat", "ilaj", "dawa", "mareez"}
 ODIA_WORDS = {"mora", "tuma", "achi", "jiba", "kara", "kahuchi", "dekhuchi", "sunuchi", "asthu", "thanda", "garma", "peta", "mathu"}
 ASSAMESE_WORDS = {"mur", "tumar", "ase", "nai", "jai", "kora", "bhal", "osodh", "pikora", "jwor", "gaa", "mur gaa", "lagise", "pain lagise"}
 
-def is_hinglish(text: str) -> bool:
-    """
-    Checks if the text is Hinglish (romanized Hindi) by matching HINGLISH_WORDS.
-    """
-    words = re.findall(r'\b[a-z]+\b', text.lower())
-    matching_words = {w for w in words if w in HINGLISH_WORDS}
-    return len(matching_words) >= 2
-
-def detect_romanized_language(text: str) -> Optional[str]:
-    """
-    Checks the text against each word list (case-insensitive, word boundary match)
-    Returns the matching language code (gu, ta, te, mr) if 2+ words match
-    Returns None if no clear match
-    """
-    words = re.findall(r'\b[a-z]+\b', text.lower())
-    word_set = set(words)
-    
-    if len(word_set & GUJARATI_WORDS) >= 2:
-        return "gu"
-    if len(word_set & TAMIL_WORDS) >= 2:
-        return "ta"
-    if len(word_set & TELUGU_WORDS) >= 2:
-        return "te"
-    if len(word_set & MARATHI_WORDS) >= 2:
-        return "mr"
-    
-    return None
+def count_matches(text: str, word_set: set) -> int:
+    """Counts how many words/phrases from the word_set are present in the text."""
+    text_lower = text.lower()
+    count = 0
+    for word in word_set:
+        if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
+            count += 1
+    return count
 
 def detect_language(text: str) -> str:
     """
@@ -72,31 +53,35 @@ def detect_language(text: str) -> str:
     if not text or not text.strip():
         return "en"
     
-    words = set(re.findall(r'\b[a-z]+\b', text.lower()))
+    # 1. Check for Romanized Indian languages first by counting matches
+    matches = {
+        "as": count_matches(text, ASSAMESE_WORDS),
+        "or": count_matches(text, ODIA_WORDS),
+        "pa": count_matches(text, PUNJABI_WORDS),
+        "ur": count_matches(text, URDU_WORDS),
+        "gu": count_matches(text, GUJARATI_WORDS),
+        "ta": count_matches(text, TAMIL_WORDS),
+        "te": count_matches(text, TELUGU_WORDS),
+        "mr": count_matches(text, MARATHI_WORDS),
+        "hi": count_matches(text, HINGLISH_WORDS)
+    }
     
-    # 1. Check Assamese unique words
-    if len(words & ASSAMESE_WORDS) >= 2:
-        return "as"
-    # 2. Check Odia unique words
-    if len(words & ODIA_WORDS) >= 2:
-        return "or"
-    # 3. Check Punjabi unique words
-    if len(words & PUNJABI_WORDS) >= 2:
-        return "pa"
-    # 4. Check Urdu unique words
-    if len(words & URDU_WORDS) >= 2:
-        return "ur"
+    # Find the language with the maximum matches
+    max_lang = max(matches, key=matches.get)
+    max_count = matches[max_lang]
     
-    # 5. Then check is_hinglish() (existing Hindi check) — return "hi" if true
-    if is_hinglish(text):
-        return "hi"
-        
-    # Then check other romanized (gu, ta, te, mr)
-    roman_lang = detect_romanized_language(text)
-    if roman_lang is not None:
-        return roman_lang
-        
-    # 3. Then check Devanagari/other Indic unicode script ranges
+    # If we found at least 1 match, we return the language with the most matches.
+    # For Hinglish ('hi'), require at least 2 matches to avoid false positives with common words,
+    # unless it's the only one that matched. Actually, let's just return if max_count >= 1 for regional,
+    # and >= 2 for Hinglish. Wait, if Hinglish has 1 and no one else has matches, maybe just return hi?
+    # Let's say if max_count >= 1, we trust it for non-Hindi. For Hindi, let's require >= 2 matches or we fall through.
+    if max_count > 0:
+        if max_lang == "hi" and max_count < 2:
+            pass # Too few matches for Hinglish, fall through to other methods
+        else:
+            return max_lang
+            
+    # 2. Check Devanagari/other Indic unicode script ranges
     # Indic unicode ranges:
     # Devanagari: \u0900-\u097f (Hindi, Marathi)
     # Bengali: \u0980-\u09ff
@@ -127,7 +112,7 @@ def detect_language(text: str) -> str:
                 return "hi"  # Default fallback for Devanagari script
             return lang_code
             
-    # 4. Then fall back to existing langdetect logic
+    # 3. Fall back to existing langdetect logic
     try:
         lang = langdetect.detect(text)
         if lang in LANG_MAP:
@@ -135,7 +120,7 @@ def detect_language(text: str) -> str:
     except Exception:
         pass
         
-    # 5. Final fallback "en" if nothing matches
+    # 4. Final fallback "en" if nothing matches
     return "en"
 
 

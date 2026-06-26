@@ -56,33 +56,19 @@ HEALTH_PROMPT = PromptTemplate.from_template(
 
 def get_answer(query: str, session_id: str = None) -> str:
     """
-    Builds a ConversationalRetrievalChain using get_llm() and get_retriever()
-    Uses the HEALTH_PROMPT
-    Returns the answer string
-    Wraps everything in try/except and returns a safe fallback message on error
+    Builds the prompt manually by fetching context and querying the LLM directly.
     """
     try:
-        llm = get_llm()
         retriever = get_retriever()
+        docs = retriever.invoke(query)
+        context_str = "\n\n".join([doc.page_content for doc in docs])
         
-        if not session_id:
-            session_id = str(uuid.uuid4())
-            
-        if session_id not in SESSION_MEMORIES:
-            SESSION_MEMORIES[session_id] = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-            
-        memory = SESSION_MEMORIES[session_id]
+        prompt = HEALTH_PROMPT.format(context=context_str, question=query)
+        llm = get_llm()
         
-        qa_chain = ConversationalRetrievalChain.from_llm(
-            llm=llm,
-            retriever=retriever,
-            memory=memory,
-            combine_docs_chain_kwargs={"prompt": HEALTH_PROMPT}
-        )
-        
-        response = qa_chain.invoke({"question": query})
-        if isinstance(response, dict):
-            return response.get("answer", "").strip()
+        response = llm.invoke(prompt)
+        if hasattr(response, "content"):
+            return response.content.strip()
         return str(response).strip()
     except Exception as e:
         print(f"Error in get_answer: {e}")
@@ -99,36 +85,26 @@ def get_answer_with_history(query: str, history: list = []) -> str:
     Generate an answer using RAG and prepend conversation history to the prompt.
     """
     try:
-        if not history:
-            return get_answer(query)
+        retriever = get_retriever()
+        docs = retriever.invoke(query)
+        context_str = "\n\n".join([doc.page_content for doc in docs])
         
-        # Keep last 6 messages only
-        trimmed_history = history[-6:]
-        
-        # Format history
-        formatted_history = "Previous conversation:\n"
-        for i in range(0, len(trimmed_history), 2):
-            if i + 1 < len(trimmed_history):
-                formatted_history += f"User: {trimmed_history[i]}\nAssistant: {trimmed_history[i+1]}\n"
-                
-        # Prepend formatted history to the question in the prompt
-        prepended_query = formatted_history + query
+        prepended_query = query
+        if history:
+            trimmed_history = history[-6:]
+            formatted_history = "Previous conversation:\n"
+            for i in range(0, len(trimmed_history), 2):
+                if i + 1 < len(trimmed_history):
+                    formatted_history += f"User: {trimmed_history[i]}\nAssistant: {trimmed_history[i+1]}\n"
+            prepended_query = formatted_history + "\nCurrent Query:\n" + query
+            
+        prompt = HEALTH_PROMPT.format(context=context_str, question=prepended_query)
         
         llm = get_llm()
-        retriever = get_retriever()
+        response = llm.invoke(prompt)
         
-        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-        
-        qa_chain = ConversationalRetrievalChain.from_llm(
-            llm=llm,
-            retriever=retriever,
-            memory=memory,
-            combine_docs_chain_kwargs={"prompt": HEALTH_PROMPT}
-        )
-        
-        response = qa_chain.invoke({"question": prepended_query})
-        if isinstance(response, dict):
-            return response.get("answer", "").strip()
+        if hasattr(response, "content"):
+            return response.content.strip()
         return str(response).strip()
     except Exception as e:
         print(f"Error in get_answer_with_history: {e}")
