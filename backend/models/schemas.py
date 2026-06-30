@@ -17,4 +17,6 @@ class ChatResponse(BaseModel):
     triage: Dict[str, Any]
     facilities: List[FacilityResult]
     session_id: str
+    lang: str = "en"
+    sources: List[str] = []
 

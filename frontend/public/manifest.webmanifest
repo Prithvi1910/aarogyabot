@@ -1,0 +1,19 @@
+{
+  "name": "AarogyaBot — Health Assistant",
+  "short_name": "AarogyaBot",
+  "description": "AI multilingual public-health assistant for rural India — triage, facility finder, and offline first-aid.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1b5557",
+  "theme_color": "#1c6a6b",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -16,16 +16,20 @@ from .retriever import get_retriever
 # Load environment variables
 load_dotenv()
 
+# Chat model is configurable; default to a stronger model for better medical accuracy.
+CHAT_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
 def get_llm():
     """
-    Loads GROQ_API_KEY from environment
-    Returns a ChatGroq instance using model "llama-3.1-8b-instant" with temperature 0.2
-    If GROQ_API_KEY is not set, falls back to Ollama with model "llama3.2"
+    Loads GROQ_API_KEY from environment.
+    Returns a ChatGroq instance using the configured CHAT_MODEL (default
+    "llama-3.3-70b-versatile") with temperature 0.2.
+    If GROQ_API_KEY is not set, falls back to Ollama with model "llama3.2".
     """
     groq_api_key = os.getenv("GROQ_API_KEY")
     if groq_api_key and groq_api_key.strip():
         return ChatGroq(
-            model="llama-3.1-8b-instant",
+            model=CHAT_MODEL,
             temperature=0.2,
             groq_api_key=groq_api_key.strip()
         )
@@ -36,22 +40,26 @@ def get_llm():
         )
 
 HEALTH_PROMPT = PromptTemplate.from_template(
-    "You are AarogyaBot, a cautious and responsible public health assistant for rural India.\n"
-    "Answer using ONLY the provided context. Do not invent medical information.\n"
-    "Be simple, clear, and very concise. Keep your answers short and crisp.\n"
-    "Provide the most useful information and explicitly state any recommended medicines or cures based on the context.\n"
-    "If the symptom is severe, briefly advise visiting the nearest Primary Health Centre (PHC).\n\n"
-    "STRICT RULES:\n"
-    "1. Keep answers short and crisp (maximum 2-3 short sentences if possible).\n"
-    "2. AVOID REPETITIVE ANSWERS: Do not repeat the exact same phrasing. Vary your language.\n"
-    "STRICT RULE 6: For medicine/medication questions:\n"
-    "- You CAN mention safe, common over-the-counter remedies for mild symptoms (paracetamol for fever, ORS for diarrhea, clean water and rest for dehydration)\n"
-    "- Always add: 'For prescription medicines, please consult a doctor at your nearest PHC'\n"
-    "- NEVER recommend prescription drugs, antibiotics, or specific dosages\n"
-    "- NEVER say you cannot help — always give the safe OTC option first, then refer to PHC for anything stronger\n\n"
-    "Context: {context}\n"
+    "You are AarogyaBot, a careful and trustworthy public health assistant for rural India.\n"
+    "Use ONLY the information in the provided context to answer. If the context does not contain "
+    "the answer, say you are not certain and advise visiting the nearest Primary Health Centre (PHC) "
+    "— never guess or invent medical facts, conditions, or medicines.\n"
+    "Write in simple, clear language that a person with little schooling can understand. "
+    "Keep it short: 2 to 4 short sentences.\n"
+    "When the context supports it, include: (a) the most likely cause, (b) one or two safe home-care "
+    "steps, and (c) one clear red-flag sign that means they must see a doctor.\n\n"
+    "MEDICINE SAFETY RULES:\n"
+    "- You MAY name common over-the-counter remedies for mild symptoms when the context supports them "
+    "(e.g. Paracetamol for fever, ORS for dehydration/diarrhoea, antiseptic for minor wounds, "
+    "Oral Rehydration Salts for fluid loss).\n"
+    "- NEVER prescribe antibiotics, antimalarials, or other prescription drugs, and NEVER give specific "
+    "prescription dosages. For anything stronger, say: 'please consult a doctor at your nearest PHC'.\n"
+    "- For dengue or suspected dengue, recommend ONLY Paracetamol and warn against Aspirin and Ibuprofen.\n"
+    "- NEVER say you cannot help — always give the safe step first, then refer to a PHC if needed.\n"
+    "- Do not repeat the exact same phrasing every time; vary your wording.\n\n"
+    "Context:\n{context}\n\n"
     "Question: {question}\n\n"
-    "Answer concisely and clearly:"
+    "Answer:"
 )
 
 def get_answer(query: str, session_id: str = None) -> str:
@@ -110,6 +118,55 @@ def get_answer_with_history(query: str, history: list = []) -> str:
         print(f"Error in get_answer_with_history: {e}")
         return "I am sorry, I am having trouble answering right now. Please visit your nearest PHC."
 
+def _pretty_source(filename: str) -> str:
+    """Turn a doc filename like 'snake_bite_emergency.txt' into 'Snake Bite Emergency'."""
+    name = filename.rsplit(".", 1)[0].replace("_", " ").strip()
+    return name.title()
+
+
+def get_answer_with_sources(query: str, history: list = []) -> Dict[str, Any]:
+    """
+    Same as get_answer_with_history, but also returns the health-doc sources the
+    answer was grounded in, for transparency / anti-hallucination citations.
+    Returns {"answer": str, "sources": [str, ...]}.
+    """
+    try:
+        retriever = get_retriever()
+        docs = retriever.invoke(query)
+        context_str = "\n\n".join([doc.page_content for doc in docs])
+
+        # Placeholder/sample docs that should not be cited to the user
+        SKIP_SOURCES = {"sample_health.txt"}
+        sources = []
+        for doc in docs:
+            src = doc.metadata.get("source")
+            if src and src not in SKIP_SOURCES:
+                pretty = _pretty_source(src)
+                if pretty not in sources:
+                    sources.append(pretty)
+
+        prepended_query = query
+        if history:
+            trimmed_history = history[-6:]
+            formatted_history = "Previous conversation:\n"
+            for i in range(0, len(trimmed_history), 2):
+                if i + 1 < len(trimmed_history):
+                    formatted_history += f"User: {trimmed_history[i]}\nAssistant: {trimmed_history[i+1]}\n"
+            prepended_query = formatted_history + "\nCurrent Query:\n" + query
+
+        prompt = HEALTH_PROMPT.format(context=context_str, question=prepended_query)
+        llm = get_llm()
+        response = llm.invoke(prompt)
+        answer = response.content.strip() if hasattr(response, "content") else str(response).strip()
+        return {"answer": answer, "sources": sources[:3]}
+    except Exception as e:
+        print(f"Error in get_answer_with_sources: {e}")
+        return {
+            "answer": "I am sorry, I am having trouble answering right now. Please visit your nearest PHC.",
+            "sources": [],
+        }
+
+
 async def stream_answer(query: str, history: list = []) -> AsyncGenerator[str, None]:
     """
     Async generator that yields response chunks from ChatGroq with streaming.
@@ -135,7 +192,7 @@ async def stream_answer(query: str, history: list = []) -> AsyncGenerator[str, N
         prompt = HEALTH_PROMPT.format(context=context_str, question=prepended_query)
         
         llm = ChatGroq(
-            model="llama-3.1-8b-instant",
+            model=CHAT_MODEL,
             temperature=0.2,
             groq_api_key=groq_api_key.strip(),
             streaming=True

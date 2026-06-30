@@ -8,48 +8,48 @@ function FacilityCard({ facility }) {
   const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(facility.name + ' ' + facility.district)}`
 
   return (
-    <div className="relative bg-white border-l-4 border-green-600 shadow-sm rounded-lg p-[12px] flex justify-between items-start gap-4">
-      <div className="flex-1 min-w-0">
+    <div className="flex items-start justify-between gap-3 rounded-2xl bg-white p-3.5 shadow-soft ring-1 ring-brand-100/70">
+      <div className="min-w-0 flex-1">
         {/* Facility name with MapPin icon */}
-        <h4 className="font-semibold text-gray-900 text-[15px] leading-tight break-words flex items-center gap-1.5">
-          <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" aria-hidden="true" />
+        <h4 className="flex items-center gap-2 break-words text-[15px] font-semibold leading-tight text-ink-900">
+          <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+            <MapPin className="h-4 w-4" aria-hidden="true" />
+          </span>
           {facility.name}
         </h4>
-        <p className="text-gray-500 text-[13px] mt-1 ml-5">
+        <p className="ml-9 mt-1 text-[13px] text-ink-500">
           {facility.type} • {facility.district}
         </p>
 
-        {/* Phone number */}
-        {facility.phone && (
-          <div className="mt-2 ml-5">
+        <div className="ml-9 mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+          {/* Phone number */}
+          {facility.phone && (
             <a
               href={`tel:${facility.phone}`}
-              className="inline-flex items-center gap-1.5 text-green-700 hover:underline text-[14px] font-medium min-h-[44px] px-1 focus:outline-none focus:ring-2 focus:ring-green-500 rounded"
+              className="inline-flex items-center gap-1.5 rounded text-[14px] font-medium text-brand-700 hover:underline focus:outline-none focus:ring-2 focus:ring-brand-300"
               aria-label={`Call ${facility.name} at ${facility.phone}`}
             >
-              <Phone className="w-3.5 h-3.5" aria-hidden="true" />
+              <Phone className="h-3.5 w-3.5" aria-hidden="true" />
               {facility.phone}
             </a>
-          </div>
-        )}
+          )}
 
-        {/* Get Directions link */}
-        <a
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block ml-5 mt-1 text-blue-600 text-xs underline hover:text-blue-800"
-        >
-          Get Directions
-        </a>
+          {/* Get Directions link */}
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs font-medium text-brand-600 hover:text-brand-700 hover:underline"
+          >
+            Get Directions →
+          </a>
+        </div>
       </div>
 
       {/* Distance badge */}
-      <div className="flex-shrink-0">
-        <span className="inline-block bg-green-600 text-white text-[12px] font-bold px-2 py-0.5 rounded-full">
-          {dist} km
-        </span>
-      </div>
+      <span className="flex-shrink-0 rounded-full bg-brand-600 px-2.5 py-1 text-[12px] font-bold text-white">
+        {dist} km
+      </span>
     </div>
   )
 }

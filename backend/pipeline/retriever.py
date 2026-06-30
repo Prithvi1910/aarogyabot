@@ -39,7 +39,9 @@ def build_index():
         print("No documents found in health_docs/ directory to index.")
         return
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    # Larger chunks keep each condition's full entry (cause, home care, red flags,
+    # medicine) together, which improves retrieval accuracy for medical Q&A.
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=900, chunk_overlap=150)
     chunks = text_splitter.split_documents(documents)
     
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
@@ -63,7 +65,7 @@ def get_retriever():
     db = FAISS.load_local(FAISS_DIR, embeddings, allow_dangerous_deserialization=True)
     return db.as_retriever(
         search_type="similarity",
-        search_kwargs={"k": 5}
+        search_kwargs={"k": 6}
     )
 
 def retrieve_documents(query: str, limit: int = 5) -> List[Dict[str, Any]]:

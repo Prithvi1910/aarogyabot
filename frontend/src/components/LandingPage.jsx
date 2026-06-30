@@ -1,75 +1,97 @@
 import React from 'react'
-import { HeartPulse } from 'lucide-react'
+import { HeartPulse, ArrowRight, Languages, Stethoscope, MapPin, Camera } from 'lucide-react'
+import HealthBackground from './HealthBackground'
+
+const FEATURES = [
+  { label: '10+ Languages', Icon: Languages },
+  { label: 'AI Triage', Icon: Stethoscope },
+  { label: 'Find PHCs', Icon: MapPin },
+  { label: 'Photo Check', Icon: Camera },
+]
+
+const STATS = [
+  { number: '65%', label: 'Rural population served' },
+  { number: '500+', label: 'Health centres mapped' },
+  { number: '24/7', label: 'Always available' },
+]
 
 function LandingPage({ onStart }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-green-800 to-green-600 px-6 py-12">
-      {/* Hero Icon */}
-      <HeartPulse className="w-16 h-16 text-white drop-shadow-lg" aria-hidden="true" />
+    <div className="relative min-h-[100dvh] overflow-hidden bg-gradient-to-b from-brand-800 via-brand-700 to-brand-500">
+      {/* Soft decorative glows */}
+      <div className="pointer-events-none absolute -top-24 -right-20 h-72 w-72 rounded-full bg-brand-400/30 blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 -left-24 h-80 w-80 rounded-full bg-brand-300/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
 
-      {/* Title */}
-      <h1 className="text-4xl font-bold text-white mt-4 tracking-tight">
-        AarogyaBot
-      </h1>
+      {/* Health-themed animated background */}
+      <HealthBackground variant="landing" />
 
-      {/* Subtitle */}
-      <p className="text-green-100 text-lg text-center max-w-sm mt-2 leading-relaxed">
-        AI-Powered Public Health Assistant for Rural India
-      </p>
+      <div className="relative z-10 mx-auto flex min-h-[100dvh] max-w-md flex-col items-center justify-center px-7 py-12 text-center">
+        {/* App icon */}
+        <div className="mb-7 flex h-20 w-20 items-center justify-center rounded-3xl glass shadow-glow animate-floaty">
+          <HeartPulse className="h-10 w-10 text-white" aria-hidden="true" />
+        </div>
 
-      {/* Feature Pills */}
-      <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-lg">
-        {[
-          "Hindi", "Gujarati", "Marathi", "Tamil", "Telugu", "English",
-          "Punjabi", "Urdu", "Odia", "Assamese"
-        ].map((lang) => (
-          <span
-            key={lang}
-            className="bg-white/20 text-white rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm"
-          >
-            {lang}
+        {/* Wordmark */}
+        <span className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-brand-100/90">
+          AarogyaBot
+        </span>
+
+        {/* Hero heading */}
+        <h1 className="text-[2.6rem] font-extrabold leading-[1.08] tracking-tight text-white">
+          Your health,
+          <br />
+          just a tap away.
+        </h1>
+
+        {/* Subtitle */}
+        <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-brand-50/80">
+          An AI public-health assistant for rural India — ask in your language by voice, text, or photo.
+        </p>
+
+        {/* Feature chips */}
+        <div className="mt-8 flex flex-wrap justify-center gap-2.5">
+          {FEATURES.map(({ label, Icon }) => (
+            <span
+              key={label}
+              className="flex items-center gap-1.5 rounded-full bg-white/12 px-3.5 py-1.5 text-[13px] font-medium text-white ring-1 ring-white/15 backdrop-blur-sm"
+            >
+              <Icon className="h-3.5 w-3.5 text-brand-100" aria-hidden="true" />
+              {label}
+            </span>
+          ))}
+        </div>
+
+        {/* Stats */}
+        <div className="mt-10 grid w-full max-w-sm grid-cols-3 gap-3">
+          {STATS.map(({ number, label }) => (
+            <div
+              key={label}
+              className="rounded-2xl bg-white/10 px-2 py-4 ring-1 ring-white/10 backdrop-blur-sm"
+            >
+              <div className="text-2xl font-bold text-white">{number}</div>
+              <div className="mt-1 text-[11px] leading-tight text-brand-50/75">{label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={onStart}
+          className="group mt-10 flex w-full max-w-sm items-center justify-between gap-3 rounded-full bg-white py-2.5 pl-7 pr-2.5 text-lg font-semibold text-brand-700 shadow-glow transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+          aria-label="Start chatting with AarogyaBot"
+        >
+          Start Chat
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-white transition-transform duration-200 group-hover:translate-x-0.5">
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </span>
-        ))}
-      </div>
-      
-      <div className="flex flex-wrap justify-center gap-2 mt-3">
-        {["500+ health centers across 15 Indian states", "24/7 Available"].map((pill) => (
-          <span
-            key={pill}
-            className="bg-white/20 text-white rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm"
-          >
-            {pill}
-          </span>
-        ))}
-      </div>
+        </button>
 
-      {/* Stats Row */}
-      <div className="flex gap-10 mt-10">
-        {[
-          { number: "65%", label: "Rural Population Served" },
-          { number: "10+", label: "Indian Languages" },
-          { number: "500+", label: "PHCs Mapped" },
-        ].map(({ number, label }) => (
-          <div key={label} className="flex flex-col items-center">
-            <span className="text-3xl font-bold text-white">{number}</span>
-            <span className="text-green-200 text-xs mt-1 text-center max-w-[80px] leading-tight">{label}</span>
-          </div>
-        ))}
+        {/* Disclaimer */}
+        <p className="mt-6 max-w-xs text-[11px] leading-relaxed text-brand-100/60">
+          For informational purposes only. Not a substitute for professional medical advice.
+        </p>
       </div>
-
-      {/* CTA Button */}
-      <button
-        onClick={onStart}
-        className="mt-8 bg-white text-green-700 font-bold rounded-full px-8 py-4 text-lg hover:bg-green-50 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-95"
-        aria-label="Start chatting with AarogyaBot"
-      >
-        Start Chat →
-      </button>
-
-      {/* Disclaimer */}
-      <p className="text-green-300 text-xs text-center mt-4 max-w-xs leading-relaxed">
-        For informational purposes only. Not a substitute for medical advice.
-      </p>
     </div>
   )
 }

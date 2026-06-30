@@ -8,3 +8,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>,
 )
+
+// Register the service worker for offline support (PWA).
+// Temporarily disabled while we debug a rendering issue.
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+//     navigator.serviceWorker.register('/sw.js').catch((err) => {
+//       console.warn('Service worker registration failed:', err)
+//     })
+//   })
+// }

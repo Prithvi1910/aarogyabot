@@ -9,6 +9,31 @@ Aarogyabot acts as a medical assistant that can:
 2. **Retrieve Health Information**: Use a retrieve-and-generate (RAG) pipeline to fetch verified health documentation.
 3. **Perform Intelligent Triage**: Classify symptoms and direct users to appropriate levels of care (self-care, primary care clinic, or emergency).
 4. **Locate Healthcare Facilities**: Search and guide users to nearest Primary Health Centers (PHCs) and government hospitals.
+5. **Visual Symptom Checker**: Accept a photo of a visible concern (rash, wound, eye, snake-bite) and use a Groq vision model to describe it, run triage, and reply in the user's language — removing the literacy and vocabulary barrier for rural users.
+6. **Voice Output (Read Aloud)**: Every bot reply can be spoken aloud in the user's language via on-device Speech Synthesis, with a per-message "Listen" button and a header toggle to auto-read replies — pairing with the existing voice input for a full see–speak–listen experience for low-literacy users.
+7. **Community Outbreak Surveillance**: Anonymized symptom signals from ordinary chats are aggregated into regional clusters and surfaced on a live alerts dashboard (likely disease, PIN area, severity) — an early-warning epidemiology layer. Endpoint `GET /surveillance/alerts`.
+8. **GPS Facility Finder + SOS-108**: One tap uses device GPS to find the nearest PHCs (via `/facilities/nearby`), and emergency triage cards show a one-tap "Call 108 Ambulance" button.
+9. **Source Citations**: Text answers cite the health docs they were grounded in, for transparency and anti-hallucination.
+10. **Installable Offline PWA**: Installs to the home screen and works without a network — a bundled first-aid pack answers safely offline (critical for 2G / no-signal rural areas).
+
+## Answer Quality & Knowledge Base
+
+- **Stronger model**: answers use `llama-3.3-70b-versatile` by default (configurable via `GROQ_MODEL`) for better medical accuracy.
+- **Grounded prompt**: the assistant answers only from retrieved health docs, refuses to invent facts, and follows strict OTC-only medicine-safety rules (no prescription drugs/dosages; Paracetamol-only guidance for dengue).
+- **Better retrieval**: larger chunks (900/150) keep each condition's full entry together; top-k raised to 6.
+- **Expanded corpus** (19 documents): added nutrition & anaemia, animal bites & rabies, first-aid emergencies, extended skin infections, digestive & urinary conditions, a safe-medications guide, and immunization & prevention.
+- **Sharper triage**: expanded emergency keywords (snake bite, drowning, choking, severe bleeding, etc.) and high-risk single-keyword PHC flags (animal bites/rabies, jaundice, fractures).
+
+## Visual Symptom Checker
+
+Users can tap the camera button in the chat to send a photo of a visible health concern. The backend:
+
+1. Sends the image to a **Groq vision model** (`GROQ_VISION_MODEL`, default `meta-llama/llama-4-scout-17b-16e-instruct`) with a cautious public-health prompt that describes only what is visible and never gives a definite diagnosis.
+2. Runs the existing rule-based **triage** on the observation (Emergency / Visit-PHC / Self-care).
+3. Grounds follow-up advice in the **RAG** health docs and re-uses the chat session history.
+4. Translates the reply into the user's language.
+
+**Endpoint:** `POST /chat/image` (multipart form: `file`, optional `note`, `session_id`, `lang`). Requires `GROQ_API_KEY`.
 
 ## Directory Structure
 

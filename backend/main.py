@@ -10,6 +10,7 @@ load_dotenv()
 from routers.chat import router as chat_router
 from routers.webhook import router as webhook_router
 from routers.facilities import router as facilities_router
+from routers.surveillance import router as surveillance_router, seed_demo_data
 
 app = FastAPI(
     title="Aarogyabot API",
@@ -30,6 +31,7 @@ app.add_middleware(
 app.include_router(chat_router)
 app.include_router(webhook_router)
 app.include_router(facilities_router)
+app.include_router(surveillance_router)
 
 @app.get("/health")
 def health_check():
@@ -37,6 +39,9 @@ def health_check():
 
 @app.on_event("startup")
 async def startup_event():
+    # Seed demo surveillance clusters so the outbreak dashboard is meaningful
+    seed_demo_data()
+
     # Build PHC database if it doesn't exist
     if not os.path.exists("data/phc_database.sqlite"):
         print("Building PHC database...")
